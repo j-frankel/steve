@@ -12,6 +12,8 @@ import de.rwth.idsg.steve.web.dto.internal.LastStatusResponse;
 import de.rwth.idsg.steve.service.internal.AddChargePointService;
 import de.rwth.idsg.steve.web.dto.internal.AddChargePointRequest;
 import de.rwth.idsg.steve.web.dto.internal.AddChargePointResponse;
+import de.rwth.idsg.steve.service.internal.DeleteChargePointService;
+import de.rwth.idsg.steve.web.dto.internal.DeleteChargePointResponse;
 
 @RestController
 @RequestMapping("/api/v1/internal")
@@ -21,15 +23,18 @@ public class InternalApiController {
     private final ChargeStateService chargeStateService;
     private final LastStatusService  lastStatusService;
     private final AddChargePointService addCpService;
+    private final DeleteChargePointService deleteCpService;
 
-    public InternalApiController(ConfigPushService configPushService,
-                                 ChargeStateService chargeStateService,
-                                 LastStatusService  lastStatusService,
-                                 AddChargePointService addCpService) {
+    public InternalApiController(ConfigPushService  configPushService,
+                                ChargeStateService chargeStateService,
+                                LastStatusService  lastStatusService,
+                                AddChargePointService addCpService,
+                                DeleteChargePointService deleteCpService) {
         this.configPushService = configPushService;
         this.chargeStateService = chargeStateService;
         this.lastStatusService  = lastStatusService;
         this.addCpService       = addCpService;
+        this.deleteCpService    = deleteCpService;
     }
 
     @GetMapping("/ping")
@@ -82,5 +87,15 @@ public class InternalApiController {
             throw new BadRequestException("chargeBoxId must be provided");
         }
         return addCpService.add(body);
+    }
+
+    @DeleteMapping("/charge-point")
+    public DeleteChargePointResponse deleteChargePoint(
+            @RequestParam(value = "chargeBoxId", required = false) String chargeBoxId) {
+
+        if (chargeBoxId == null || chargeBoxId.isBlank()) {
+            throw new BadRequestException("chargeBoxId must be provided");
+        }
+        return deleteCpService.delete(chargeBoxId);
     }
 }
