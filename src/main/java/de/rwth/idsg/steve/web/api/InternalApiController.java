@@ -7,6 +7,8 @@ import de.rwth.idsg.steve.web.dto.internal.AuthRequiredResponse;
 import de.rwth.idsg.steve.web.dto.internal.ChargeStateResponse;
 import de.rwth.idsg.steve.web.api.exception.BadRequestException;
 import org.springframework.web.bind.annotation.*;
+import de.rwth.idsg.steve.service.internal.LastStatusService;
+import de.rwth.idsg.steve.web.dto.internal.LastStatusResponse;
 
 @RestController
 @RequestMapping("/api/v1/internal")
@@ -14,11 +16,14 @@ public class InternalApiController {
 
     private final ConfigPushService configPushService;
     private final ChargeStateService chargeStateService;
+    private final LastStatusService  lastStatusService;
 
-    public InternalApiController(ConfigPushService cfgPush,
-                                 ChargeStateService chargeStateService) {
-        this.configPushService = cfgPush;
+    public InternalApiController(ConfigPushService configPushService,
+                                 ChargeStateService chargeStateService,
+                                 LastStatusService  lastStatusService) {
+        this.configPushService = configPushService;
         this.chargeStateService = chargeStateService;
+        this.lastStatusService  = lastStatusService;
     }
 
     @GetMapping("/ping")
@@ -51,5 +56,15 @@ public class InternalApiController {
         }
 
         return chargeStateService.getCurrentState(chargeBoxId);
+    }
+
+    @GetMapping("/last-status")
+    public LastStatusResponse getLastStatus(
+            @RequestParam(value = "chargeBoxId", required = false) String chargeBoxId) {
+
+        if (chargeBoxId == null || chargeBoxId.isBlank()) {
+            throw new BadRequestException("chargeBoxId must be provided");
+        }
+        return lastStatusService.getLastStatus(chargeBoxId);
     }
 }
