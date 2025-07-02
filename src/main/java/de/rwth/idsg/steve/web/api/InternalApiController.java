@@ -9,6 +9,9 @@ import de.rwth.idsg.steve.web.api.exception.BadRequestException;
 import org.springframework.web.bind.annotation.*;
 import de.rwth.idsg.steve.service.internal.LastStatusService;
 import de.rwth.idsg.steve.web.dto.internal.LastStatusResponse;
+import de.rwth.idsg.steve.service.internal.AddChargePointService;
+import de.rwth.idsg.steve.web.dto.internal.AddChargePointRequest;
+import de.rwth.idsg.steve.web.dto.internal.AddChargePointResponse;
 
 @RestController
 @RequestMapping("/api/v1/internal")
@@ -17,13 +20,16 @@ public class InternalApiController {
     private final ConfigPushService configPushService;
     private final ChargeStateService chargeStateService;
     private final LastStatusService  lastStatusService;
+    private final AddChargePointService addCpService;
 
     public InternalApiController(ConfigPushService configPushService,
                                  ChargeStateService chargeStateService,
-                                 LastStatusService  lastStatusService) {
+                                 LastStatusService  lastStatusService,
+                                 AddChargePointService addCpService) {
         this.configPushService = configPushService;
         this.chargeStateService = chargeStateService;
         this.lastStatusService  = lastStatusService;
+        this.addCpService       = addCpService;
     }
 
     @GetMapping("/ping")
@@ -66,5 +72,15 @@ public class InternalApiController {
             throw new BadRequestException("chargeBoxId must be provided");
         }
         return lastStatusService.getLastStatus(chargeBoxId);
+    }
+
+    @PostMapping("/charge-point")
+    public AddChargePointResponse addChargePoint(
+            @RequestBody AddChargePointRequest body) {
+
+        if (body.getChargeBoxId() == null || body.getChargeBoxId().isBlank()) {
+            throw new BadRequestException("chargeBoxId must be provided");
+        }
+        return addCpService.add(body);
     }
 }
