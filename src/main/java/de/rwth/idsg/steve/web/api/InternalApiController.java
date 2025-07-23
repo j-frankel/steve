@@ -14,6 +14,11 @@ import de.rwth.idsg.steve.web.dto.internal.AddChargePointRequest;
 import de.rwth.idsg.steve.web.dto.internal.AddChargePointResponse;
 import de.rwth.idsg.steve.service.internal.DeleteChargePointService;
 import de.rwth.idsg.steve.web.dto.internal.DeleteChargePointResponse;
+import java.util.concurrent.TimeoutException;
+import de.rwth.idsg.steve.web.dto.internal.ClockAlignedDataIntervalRequest;
+import de.rwth.idsg.steve.web.dto.internal.ClockAlignedDataIntervalResponse;
+import de.rwth.idsg.steve.web.dto.internal.MeterValuesSampledDataRequest;
+import de.rwth.idsg.steve.web.dto.internal.MeterValuesSampledDataResponse;
 
 @RestController
 @RequestMapping("/api/v1/internal")
@@ -97,5 +102,43 @@ public class InternalApiController {
             throw new BadRequestException("chargeBoxId must be provided");
         }
         return deleteCpService.delete(chargeBoxId);
+    }
+
+@PutMapping("/clock-aligned-data-interval")
+    public ClockAlignedDataIntervalResponse pushClockAlignedDataInterval(
+            @RequestBody ClockAlignedDataIntervalRequest body)
+            throws InterruptedException, TimeoutException {
+
+        if (body.getChargeBoxId() == null || body.getChargeBoxId().isBlank()) {
+            throw new BadRequestException("chargeBoxId must be provided");
+        }
+
+        var serviceResp = configPushService.pushClockAlignedDataInterval(
+                body.getChargeBoxId(), body.getSeconds());
+
+        ClockAlignedDataIntervalResponse resp = new ClockAlignedDataIntervalResponse();
+        resp.setAccepted(serviceResp.isAccepted());
+        resp.setTaskId(serviceResp.getTaskId());
+        resp.setMessage(serviceResp.getMessage());
+        return resp;
+    }
+
+    @PutMapping("/meter-values-sampled-data")
+    public MeterValuesSampledDataResponse pushMeterValuesSampledData(
+            @RequestBody MeterValuesSampledDataRequest body)
+            throws InterruptedException, TimeoutException {
+
+        if (body.getChargeBoxId() == null || body.getChargeBoxId().isBlank()) {
+            throw new BadRequestException("chargeBoxId must be provided");
+        }
+
+        var serviceResp = configPushService.pushMeterValuesSampledData(
+                body.getChargeBoxId(), body.getMeasurands());
+
+        MeterValuesSampledDataResponse resp = new MeterValuesSampledDataResponse();
+        resp.setAccepted(serviceResp.isAccepted());
+        resp.setTaskId(serviceResp.getTaskId());
+        resp.setMessage(serviceResp.getMessage());
+        return resp;
     }
 }

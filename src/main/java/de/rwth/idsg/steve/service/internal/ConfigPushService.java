@@ -71,4 +71,65 @@ public class ConfigPushService {
                                  : "Rejected by charge point or timed-out");
         return resp;
     }
+
+    public AuthRequiredResponse pushClockAlignedDataInterval(String chargeBoxId,
+                                                             int intervalSeconds)
+            throws InterruptedException, TimeoutException {
+
+        ChangeConfigurationParams params = new ChangeConfigurationParams();
+        params.setConfKey("ClockAlignedDataInterval");
+        params.setValue(Integer.toString(intervalSeconds));
+        params.setChargePointSelectList(List.of(
+                new ChargePointSelect(OcppProtocol.V_16_JSON, chargeBoxId)));
+
+        return execute(params);
+    }
+
+    public AuthRequiredResponse pushMeterValuesSampledData(String chargeBoxId,
+                                                           String measurands)
+            throws InterruptedException, TimeoutException {
+
+        ChangeConfigurationParams params = new ChangeConfigurationParams();
+        params.setConfKey("MeterValuesSampledData");
+        params.setValue(measurands);
+        params.setChargePointSelectList(List.of(
+                new ChargePointSelect(OcppProtocol.V_16_JSON, chargeBoxId)));
+
+        return execute(params);
+    }
+
+    private AuthRequiredResponse execute(ChangeConfigurationParams params)
+            throws InterruptedException, TimeoutException {
+
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        OcppCallback<String> cb = new OcppCallback<>() {
+            @Override public void success(String id, String status)   {
+                future.complete("Accepted".equalsIgnoreCase(status));
+            }
+            @Override public void success(String id, OcppJsonError e) {
+                future.complete(false);
+            }
+            @Override public void failed (String id, Exception ex)    {
+                future.completeExceptionally(ex);
+            }
+        };
+
+        int taskId = client.changeConfiguration(params, cb);
+
+        boolean accepted;
+        try {
+            accepted = future.get(30, TimeUnit.SECONDS);
+        } catch (ExecutionException ex) {
+            throw new TimeoutException(ex.getCause().getMessage());
+        }
+
+        AuthRequiredResponse resp = new AuthRequiredResponse();
+        resp.setAccepted(accepted);
+        resp.setTaskId(taskId);
+        resp.setMessage(accepted
+                        ? "Accepted by charge point"
+                        : "Rejected by charge point or timed-out");
+        return resp;
+    }
 }
