@@ -1,6 +1,6 @@
 package de.rwth.idsg.steve.web.dto.internal;
 
-public class MeterValuesSampledDataRequest {
+public class MeterValuesAlignedDataRequest {
 
     private String chargeBoxId;
     private String measurands;

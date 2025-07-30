@@ -1,6 +1,6 @@
 package de.rwth.idsg.steve.web.dto.internal;
 
-public class MeterValuesSampledDataResponse {
+public class MeterValuesAlignedDataResponse {
 
     private boolean accepted;
     private int     taskId;

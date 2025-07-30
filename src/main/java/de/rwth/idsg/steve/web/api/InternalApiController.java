@@ -17,8 +17,8 @@ import de.rwth.idsg.steve.web.dto.internal.DeleteChargePointResponse;
 import java.util.concurrent.TimeoutException;
 import de.rwth.idsg.steve.web.dto.internal.ClockAlignedDataIntervalRequest;
 import de.rwth.idsg.steve.web.dto.internal.ClockAlignedDataIntervalResponse;
-import de.rwth.idsg.steve.web.dto.internal.MeterValuesSampledDataRequest;
-import de.rwth.idsg.steve.web.dto.internal.MeterValuesSampledDataResponse;
+import de.rwth.idsg.steve.web.dto.internal.MeterValuesAlignedDataRequest;
+import de.rwth.idsg.steve.web.dto.internal.MeterValuesAlignedDataResponse;
 
 @RestController
 @RequestMapping("/api/v1/internal")
@@ -123,19 +123,19 @@ public class InternalApiController {
         return resp;
     }
 
-    @PutMapping("/meter-values-sampled-data")
-    public MeterValuesSampledDataResponse pushMeterValuesSampledData(
-            @RequestBody MeterValuesSampledDataRequest body)
+    @PutMapping("/meter-values-aligned-data")
+    public MeterValuesAlignedDataResponse pushMeterValuesAlignedData(
+            @RequestBody MeterValuesAlignedDataRequest body)
             throws InterruptedException, TimeoutException {
 
         if (body.getChargeBoxId() == null || body.getChargeBoxId().isBlank()) {
             throw new BadRequestException("chargeBoxId must be provided");
         }
 
-        var serviceResp = configPushService.pushMeterValuesSampledData(
+        var serviceResp = configPushService.pushMeterValuesAlignedData(
                 body.getChargeBoxId(), body.getMeasurands());
 
-        MeterValuesSampledDataResponse resp = new MeterValuesSampledDataResponse();
+        MeterValuesAlignedDataResponse resp = new MeterValuesAlignedDataResponse();
         resp.setAccepted(serviceResp.isAccepted());
         resp.setTaskId(serviceResp.getTaskId());
         resp.setMessage(serviceResp.getMessage());

@@ -85,12 +85,12 @@ public class ConfigPushService {
         return execute(params);
     }
 
-    public AuthRequiredResponse pushMeterValuesSampledData(String chargeBoxId,
+    public AuthRequiredResponse pushMeterValuesAlignedData(String chargeBoxId,
                                                            String measurands)
             throws InterruptedException, TimeoutException {
 
         ChangeConfigurationParams params = new ChangeConfigurationParams();
-        params.setConfKey("MeterValuesSampledData");
+        params.setConfKey("MeterValuesAlignedData");
         params.setValue(measurands);
         params.setChargePointSelectList(List.of(
                 new ChargePointSelect(OcppProtocol.V_16_JSON, chargeBoxId)));
